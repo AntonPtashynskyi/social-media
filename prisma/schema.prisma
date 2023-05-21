@@ -12,6 +12,29 @@ datasource db {
 }
 
 // Necessary for Next auth
+model Post {
+    id        String   @id @default(uuid())
+    userId    String
+    content   String
+    createdAt DateTime @default(now())
+
+    user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    likes Like[]
+
+    @@index(userId())
+}
+
+model Like {
+    userId String
+    postId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    @@id([userId, postId])
+    @@index([postId])
+    @@index([userId])
+}
+
 model Account {
     id                String  @id @default(cuid())
     userId            String
@@ -49,6 +72,12 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+
+    // Non-Next Auth
+    posts     Post[]
+    like      Like[]
+    followers User[] @relation(name: "Followers")
+    follows   User[] @relation(name: "Followers")
 }
 
 model VerificationToken {
